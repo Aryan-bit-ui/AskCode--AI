@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AskCode AI (Gemini)</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #eef1f7; padding: 20px; margin: 0; }
+    .chat-container { max-width: 650px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    header { text-align: center; margin-bottom: 10px; }
+    header h1 { color: #4c8ef7; margin: 0; }
+    #chat-box { height: 360px; overflow-y: auto; border: 1px solid #d6d6d6; padding: 15px; background: #f9fbff; border-radius: 6px; }
+    .input-area { margin-top: 15px; display: flex; gap: 10px; }
+    .input-area input { flex: 1; padding: 10px; font-size: 16px; border: 2px solid #4c8ef7; border-radius: 6px; }
+    .input-area button { padding: 10px 16px; background: #4c8ef7; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .bot, .user { margin-top: 10px; }
+    .user { color: #1a1a1a; } .bot { color: #333; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <header>
+      <h1>🤖 AskCode AI!</h1>
+      <p>Powered by AryanDev Studios</p>
+    </header>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ask me anything!">
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+<script>
+const API_URL ='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+const API_KEY = 'AIzaSyC1nE4YcrG1leJxnxJ17YMCV3xq1Yf6_F0';
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const userMsg = input.value.trim();
+  if (!userMsg) return;
+
+  const chatBox = document.getElementById('chat-box');
+  chatBox.innerHTML += `<div class="user"><strong>You:</strong> ${userMsg}</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+  input.value = '';
+
+  try {
+    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          { parts: [{ text: userMsg }] }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '[Gemini had no reply 🤖]';
+    chatBox.innerHTML += `<div class="bot"><strong>AskCode AI:</strong> ${reply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+  } catch (err) {
+    console.error('Error:', err);
+    chatBox.innerHTML += `<div class="bot"><strong>AskCode AI:</strong> ⚠️ Could not connect. Check your API key or browser permissions.</div>`;
+  }
+}
+
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('userInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+</body>
+</html>
